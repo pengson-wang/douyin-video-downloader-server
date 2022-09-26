@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "start": "deno run -A --watch=app/,downloader/ app/app.ts"
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window", "dom"],
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true
+  }
+}
