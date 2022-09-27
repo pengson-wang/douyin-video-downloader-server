@@ -15,7 +15,7 @@ export class Source {
   @Primary()
   id!: number
 
-  @Column({name: "source_id"})
+  @Column({name: "source_url"})
   sourceId!: string;
 
   @Column({name: "video_source_url"})
@@ -41,31 +41,26 @@ export class ORM {
     return ORM.orm
   }
   async getById(id: number) {
-    return this.manager.query(Source).where('id', id).first()
+    return await this.manager.query(Source).where('id', id).first()
+  }
+  async getByRequestId(requestId: string) {
+    return await this.manager.query(Source).where('requestId', requestId).first()
   }
   async getNotInWorker() {
-    return this.manager.query(Source).where('status', Q.in([StatusOfSource.Initial, StatusOfSource.Failed]) ).all()
+    return await this.manager.query(Source).where('status', Q.in([StatusOfSource.Initial, StatusOfSource.Failed]) ).all()
   }
   async getAllSources() {
-    return this.manager.query(Source).all()
+    return await this.manager.query(Source).all()
   }
 
   async saveSources(...source: Source[]) {
-    return this.manager.save([...source])
+    return await this.manager.save([...source])
   }
   async saveSource(source: Source) {
-    return this.manager.save(source)
+    return await this.manager.save(source)
   }
 }
 
-const orm = ORM.getInstance()
-
-// const source = await orm.getById(1)
-// if (source) {
-// source.status = StatusOfSource.Succeed
-// await orm.saveSource(source)
-// await db.disconnect()
-// }
 globalThis.onbeforeunload = (e: Event): void => {
   const asyncCall = async () => {
     await db.disconnect()
