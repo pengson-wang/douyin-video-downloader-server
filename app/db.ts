@@ -1,11 +1,9 @@
 import { connect, Model, Column, Manager, Primary, Q } from "https://deno.land/x/cotton@v0.7.5/mod.ts";
 import { Status as StatusOfSource } from "../types/source.ts";
-//import worker from "./worker.ts";
-
 
 const db = await connect({
   type: "sqlite",
-  database: "../douyin.db",
+  database: "./douyin.db",
 });
 
 const manager = db.getManager();
@@ -41,23 +39,35 @@ export class ORM {
     return ORM.orm
   }
   async getById(id: number) {
-    return await this.manager.query(Source).where('id', id).first()
+    return this.manager.query(Source).where('id', id).first()
   }
   async getByRequestId(requestId: string) {
-    return await this.manager.query(Source).where('requestId', requestId).first()
+    return this.manager.query(Source).where('requestId', requestId).first()
   }
   async getNotInWorker() {
-    return await this.manager.query(Source).where('status', Q.in([StatusOfSource.Initial, StatusOfSource.Failed]) ).all()
+    return this.manager.query(Source).where('status', Q.in([StatusOfSource.Initial, StatusOfSource.Failed]) ).all()
   }
   async getAllSources() {
-    return await this.manager.query(Source).all()
+    return this.manager.query(Source).all()
   }
 
+  async getSources({offset, limit}: {offset: number, limit: number }) {
+    const count = await this.manager.query(Source).count()
+    const data = await this.manager.query(Source).offset(offset).limit(limit).all()
+    return {
+      total: count,
+      offset,
+      limit,
+      data
+    }
+  }
+
+
   async saveSources(...source: Source[]) {
-    return await this.manager.save([...source])
+    return this.manager.save([...source])
   }
   async saveSource(source: Source) {
-    return await this.manager.save(source)
+    return this.manager.save(source)
   }
 }
 

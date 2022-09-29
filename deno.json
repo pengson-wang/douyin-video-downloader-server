@@ -1,6 +1,7 @@
 {
   "tasks": {
-    "start": "deno run -A --watch=app/,downloader/ app/app.ts"
+    "dev": "deno run -A --watch=app/,downloader/ app/app.ts",
+    "start": "deno run --allow-all app/app.ts"
   },
   "compilerOptions": {
     "allowJs": true,

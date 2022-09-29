@@ -1,28 +1,36 @@
 import { Router } from "https://deno.land/x/oak/mod.ts";
 import { Status as StatusOfSource } from "../types/source.ts";
 import { ORM, Source } from './db.ts'
-import { v4 } from "https://deno.land/std@0.157.0/uuid/mod.ts";
+import { helpers } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 
+const { getQuery } = helpers;
 const router = new Router();
 const orm = ORM.getInstance()
+
 router.get("/", (ctx) => {
-  ctx.response.body = "Hello world!";
-});
+  ctx.response.body = "<h1>douyin video parser</h1>"
+})
+
+router.get('/health', (ctx) => {
+  ctx.response.headers.append('cache-control',  'no-cache')
+  ctx.response.body = { status: 'available'}
+})
 
 router.get('/jobs', async (ctx) => {
-  ctx.response.headers.append('Content-Type', 'application/json')
+  const query = getQuery(ctx)
   try {
-    const sources = await orm.getAllSources()
-    ctx.response.body = JSON.stringify(sources, null, 2)
+    const offset = parseInt(query['offset'] ?? '0')
+    const limit = parseInt(query['limit'] ?? '20')
+    const payload = await orm.getSources({offset, limit})
+    ctx.response.body = payload
   } catch(err) {
     ctx.response.status = 500
-    ctx.response.body = JSON.stringify({ error: err.message }, null, 2)
+    ctx.response.body = { error: err.message }
   }
 })
 
 
 router.post('/jobs', async (ctx) => {
-  ctx.response.headers.append('Content-Type', 'application/json')
   const result = ctx.request.body({type: 'json'})
   const { url } = await result.value
   const _source = new Source()
@@ -36,15 +44,14 @@ router.post('/jobs', async (ctx) => {
     // requestId manually.
     const source = await orm.getByRequestId(_source.requestId)
     ctx.response.status = 201
-    ctx.response.body = JSON.stringify(source, null, 2)
+    ctx.response.body = source
   } catch(err) {
     ctx.response.status = 500
-    ctx.response.body = JSON.stringify({ error: err.message }, null, 2)
+    ctx.response.body = { error: err.message }
   }
 })
 
 router.get('/jobs/:id', async (ctx) => {
-  ctx.response.headers.append('Content-Type', 'application/json')
   const _id = ctx.params.id
   if (_id) {
     const id = parseInt(_id)
@@ -54,10 +61,10 @@ router.get('/jobs/:id', async (ctx) => {
       return
     }
     ctx.response.status = 200
-    ctx.response.body = JSON.stringify(source, null, 2)
+    ctx.response.body = source
   } else {
     ctx.response.status = 400
-    ctx.response.body = JSON.stringify({error: 'no id provider'}, null, 2)
+    ctx.response.body = {error: 'id is required to get source'}
   }
 })
 
