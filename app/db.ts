@@ -1,9 +1,12 @@
 import { connect, Model, Column, Manager, Primary, Q } from "https://deno.land/x/cotton@v0.7.5/mod.ts";
 import { Status as StatusOfSource } from "../types/source.ts";
+import process from "https://deno.land/std@0.153.0/node/process.ts";
+
+console.log(`process.env.NODE_ENV=${process.env.NODE_ENV}`)
 
 const db = await connect({
   type: "sqlite",
-  database: "./douyin.db",
+  database: process.env.NODE_ENV === 'production' ? './douyin_docker.db' : "./douyin.db",
 });
 
 const manager = db.getManager();
