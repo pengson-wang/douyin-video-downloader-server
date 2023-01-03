@@ -1,0 +1,7 @@
+.idea
+douyin.db
+schema.sql
+LICENSE
+README.md
+.gitignore
+Makefile
